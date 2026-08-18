@@ -1,5 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
 body {
   background-color: #fff;
   color: #000
@@ -14,9 +23,12 @@ body {
   min-height: 100vh;
   padding-top: 10vh;
   padding-left: 20px;
+  padding-right: 20px;
   box-sizing: border-box;
   cursor: crosshair;
-  
+  /* allow vertical scroll while still letting JS read touch coordinates */
+  touch-action: pan-y;
+
   h1 {
     margin: 0;
     padding: 0;
@@ -27,7 +39,7 @@ body {
     text-align: left;
     width: 80%;
     font-weight: 500;
-    
+
     div {
       position: relative;
     }
@@ -47,4 +59,43 @@ body {
   min-width: 50px;
   height: 1px;
   font-size: 11px;
+}
+
+/* Tablets and small laptops */
+@media (max-width: 900px) {
+  .title h1 {
+    font-size: 9vw;
+    width: 100%;
+  }
+}
+
+/* Phones */
+@media (max-width: 600px) {
+  .title {
+    padding-top: 12vh;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .title h1 {
+    font-size: 11vw;
+    letter-spacing: -0.05rem;
+    line-height: 1.05;
+    width: 100%;
+  }
+
+  .name {
+    top: 12px;
+  }
+
+  .detail-size {
+    font-size: 9px;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 380px) {
+  .title h1 {
+    font-size: 12vw;
+  }
 }
