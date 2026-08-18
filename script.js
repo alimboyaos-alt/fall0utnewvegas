@@ -107,55 +107,37 @@ texts.forEach((txt) => {
 });
 
 // --- Mobile / touch support ---
-// While a finger is down on the screen (dragging to scroll), the lines
-// currently on screen glitch continuously. The moment the finger lifts,
-// everything snaps back to normal — no lingering effect.
+// Only the line currently under the finger transforms — not the whole
+// screen — and only for as long as the finger is actually touching it.
 
-const CONTINUOUS_INTERVAL_MS = 180;
-let continuousInterval = null;
-let touchActive = false;
-
-function getLinesInViewport() {
-    return allLines.filter(({ element }) => {
-        const rect = element.getBoundingClientRect();
-        return rect.bottom > 0 && rect.top < window.innerHeight;
-    });
+function findLineAtPoint(x, y) {
+    const el = document.elementFromPoint(x, y);
+    if (!el) return null;
+    return allLines.find(({ element }) => element === el || element.contains(el)) || null;
 }
 
-function runContinuousEffect() {
-    getLinesInViewport().forEach(({ chars }) => triggerEffect(chars));
-}
+let lastTouchedLine = null;
 
-function resetAllChars() {
-    allLines.forEach(({ chars }) => {
-        chars.forEach((char) => {
-            gsap.killTweensOf(char);
-            if (char.dataset.orig) char.textContent = char.dataset.orig;
-            char.style.border = "none";
-            char.style.color = "#000";
-            const detail = char.querySelector(".detail-size");
-            if (detail) detail.remove();
-        });
-    });
-}
+function handleTouchPoint(x, y) {
+    const hit = findLineAtPoint(x, y);
+    const el = hit ? hit.element : null;
 
-function startContinuousEffect() {
-    if (touchActive) return;
-    touchActive = true;
-    runContinuousEffect();
-    continuousInterval = setInterval(runContinuousEffect, CONTINUOUS_INTERVAL_MS);
-}
-
-function stopContinuousEffect() {
-    touchActive = false;
-    if (continuousInterval) {
-        clearInterval(continuousInterval);
-        continuousInterval = null;
+    if (el !== lastTouchedLine) {
+        lastTouchedLine = el;
+        if (hit) triggerEffect(hit.chars);
     }
-    resetAllChars();
 }
 
-document.addEventListener("touchstart", startContinuousEffect, { passive: true });
-document.addEventListener("touchmove", startContinuousEffect, { passive: true });
-document.addEventListener("touchend", stopContinuousEffect, { passive: true });
-document.addEventListener("touchcancel", stopContinuousEffect, { passive: true });
+document.addEventListener("touchstart", (e) => {
+    const touch = e.touches[0];
+    if (touch) handleTouchPoint(touch.clientX, touch.clientY);
+}, { passive: true });
+
+document.addEventListener("touchmove", (e) => {
+    const touch = e.touches[0];
+    if (touch) handleTouchPoint(touch.clientX, touch.clientY);
+}, { passive: true });
+
+document.addEventListener("touchend", () => {
+    lastTouchedLine = null;
+}, { passive: true });
